@@ -1,0 +1,9 @@
+flask
+flask-cors
+flask-bcrypt
+razorpay
+python-dotenv
+reportlab
+qrcode
+pillow
+gunicorn

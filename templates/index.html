@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CricketPass – Book Match Tickets</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav id="navbar">
+  <div class="logo">Cricket<span>Pass</span></div>
+  <ul>
+    <li><a href="#matches">Matches</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#mybookings">My Bookings</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="/login"><button class="nav-btn">Login</button></a>
+    <a href="/register"><button class="nav-btn primary">Sign Up</button></a>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-tag">🏏 India's #1 Cricket Ticket Platform</div>
+  <h1>Book Your<br/><span>Cricket</span> Seat</h1>
+  <p>Live the thrill of the stadium. Book tickets for India's biggest T20, ODI &amp; Test matches instantly.</p>
+  <div class="hero-badges">
+    <span class="badge">✅ Instant Confirmation</span>
+    <span class="badge">🎟️ E-Ticket on Email</span>
+    <span class="badge">💳 Secure Payment</span>
+    <span class="badge">🔄 Easy Refund</span>
+  </div>
+  <div class="hero-search">
+    <input type="text" id="searchInput" placeholder="Search match, team or stadium..." oninput="filterMatches()"/>
+    <button onclick="filterMatches()">🔍 Search</button>
+  </div>
+</section>
+
+<!-- ===== STATS BAR ===== -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="num">48+</div><div class="lbl">Upcoming Matches</div></div>
+  <div class="stat-item"><div class="num">12</div><div class="lbl">Stadiums</div></div>
+  <div class="stat-item"><div class="num">2.4L+</div><div class="lbl">Tickets Sold</div></div>
+  <div class="stat-item"><div class="num">4.9 ⭐</div><div class="lbl">User Rating</div></div>
+  <div class="stat-item"><div class="num">100%</div><div class="lbl">Secure Booking</div></div>
+</div>
+
+<!-- ===== MATCHES ===== -->
+<section class="section" id="matches">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Upcoming <span>Matches</span></div>
+      <div class="section-sub">Select your match and book seats before they sell out</div>
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterByType('all', this)">All</button>
+      <button class="filter-tab" onclick="filterByType('T20', this)">T20</button>
+      <button class="filter-tab" onclick="filterByType('ODI', this)">ODI</button>
+      <button class="filter-tab" onclick="filterByType('TEST', this)">Test</button>
+    </div>
+  </div>
+  <div class="matches-grid" id="matchGrid"></div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section class="how-section" id="how">
+  <div class="section">
+    <div class="section-title" style="text-align:center;margin-bottom:36px;">How It <span>Works</span></div>
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-icon">🏟️</div>
+        <h3>Choose Match</h3>
+        <p>Browse upcoming matches and select your favourite team's game</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">💺</div>
+        <h3>Select Stand</h3>
+        <p>Pick from General, Pavilion, Premium or VIP Box as per budget</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">💳</div>
+        <h3>Pay Securely</h3>
+        <p>Pay via UPI, Card or Net Banking — 100% safe checkout</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">🎟️</div>
+        <h3>Get E-Ticket</h3>
+        <p>Receive instant e-ticket on email — ready to scan at gate!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MY BOOKINGS ===== -->
+<section class="section" id="mybookings">
+  <div class="section-header">
+    <div>
+      <div class="section-title">My <span>Bookings</span></div>
+      <div class="section-sub">Your recent ticket bookings</div>
+    </div>
+    <button class="filter-tab active" onclick="loadBookings()">🔄 Refresh</button>
+  </div>
+  <div class="table-wrap">
+    <table class="bookings-table">
+      <thead>
+        <tr>
+          <th>Ticket ID</th>
+          <th>Match</th>
+          <th>Name</th>
+          <th>Stand</th>
+          <th>Qty</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="bookingsBody">
+        <tr><td colspan="7" class="empty-row">Loading bookings...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-logo">Cricket<span>Pass</span></div>
+    <div class="footer-links">
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Refund Policy</a>
+    </div>
+    <div class="footer-copy">© 2025 CricketPass. Made with ❤️ for cricket fans.</div>
+  </div>
+</footer>
+
+<!-- ===== BOOKING MODAL ===== -->
+<div class="modal-overlay" id="bookingOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🎟️ Book Tickets</h2>
+      <button class="modal-close" onclick="closeBooking()">✕</button>
+    </div>
+    <div class="modal-match-info">
+      <strong id="modalMatchName">—</strong>
+      <span id="modalMatchMeta">—</span>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="buyerName" placeholder="Rahul Sharma"/>
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="tel" id="buyerPhone" placeholder="+91 98765 43210"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="buyerEmail" placeholder="rahul@email.com"/>
+    </div>
+    <hr class="divider"/>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Stand / Category</label>
+        <select id="standSelect" onchange="updateSummary()">
+          <option value="general">General Stand - Rs.500</option>
+          <option value="pavilion">Pavilion - Rs.1,200</option>
+          <option value="premium">Premium Covered - Rs.2,500</option>
+          <option value="vip">VIP Box - Rs.6,000</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Number of Tickets</label>
+        <select id="ticketCount" onchange="updateSummary()">
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option>
+        </select>
+      </div>
+    </div>
+    <div class="ticket-summary">
+      <div class="summary-title">Booking Summary</div>
+      <div class="summary-row"><span>Category</span><span id="sumCat">General Stand</span></div>
+      <div class="summary-row"><span>Price per ticket</span><span id="sumPrice">Rs.500</span></div>
+      <div class="summary-row"><span>Tickets</span><span id="sumCount">1</span></div>
+      <div class="summary-row"><span>Convenience fee (6%)</span><span id="sumFee">Rs.30</span></div>
+      <div class="summary-row total"><span>Total Payable</span><span id="sumTotal">Rs.530</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeBooking()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmBooking()">Pay & Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SUCCESS MODAL ===== -->
+<div class="modal-overlay" id="successOverlay">
+  <div class="modal success-modal">
+    <span class="success-icon">🎉</span>
+    <h2>Booking Confirmed!</h2>
+    <p class="success-sub">Your e-ticket has been booked successfully</p>
+    <div class="ticket-card">
+      <div class="ticket-id-label">Your Ticket ID</div>
+      <div class="ticket-id" id="successTicketId">CP123456</div>
+      <div class="ticket-details">
+        <span><strong id="successMatch">-</strong>Match</span>
+        <span><strong id="successStand">-</strong>Stand</span>
+        <span><strong id="successQty">-</strong>Tickets</span>
+        <span><strong id="successTotal">-</strong>Paid</span>
+      </div>
+    </div>
+    <p class="success-note">Check your email for the e-ticket. See you at the stadium!</p>
+    <button class="btn-confirm" style="width:100%;margin-top:20px;" onclick="closeSuccess()">Back to Matches</button>
+  </div>
+</div>
+
+<!-- ===== RAZORPAY ===== -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<input type="hidden" id="razorpay-key" value="{{ razorpay_key }}"/>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"><span id="toastMsg">Done!</span></div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
