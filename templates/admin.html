@@ -496,9 +496,16 @@
         <td>${STAND_NAMES[b.stand] || b.stand}</td>
         <td>${b.quantity}</td>
         <td style="color:var(--accent);font-weight:700">Rs.${b.total_price.toLocaleString()}</td>
-        <td>${badgeHtml(b.payment_status)}</td>
+        <td>
+          <select onchange="updateStatus(${b.id}, this.value)" style="background:var(--card);border:1px solid rgba(255,255,255,0.1);color:var(--text);padding:4px 8px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.78rem;cursor:pointer;outline:none;">
+            <option value="demo"    ${b.payment_status==='demo'    ? 'selected' : ''}>🎫 Demo</option>
+            <option value="paid"    ${b.payment_status==='paid'    ? 'selected' : ''}>✅ Paid</option>
+            <option value="pending" ${b.payment_status==='pending' ? 'selected' : ''}>⏳ Pending</option>
+            <option value="cancelled" ${b.payment_status==='cancelled' ? 'selected' : ''}>❌ Cancelled</option>
+          </select>
+        </td>
         <td style="color:var(--muted);font-size:0.78rem">${b.booked_at ? b.booked_at.split('.')[0] : '—'}</td>
-        <td><button class="del-btn" onclick="deleteBooking(${b.id})">🗑️ Delete</button></td>
+        <td><button class="del-btn" onclick="deleteBooking(${b.id})">🗑️</button></td>
       </tr>`).join('');
 
     recentBody.innerHTML = data.slice(0, 5).map(b => `
@@ -541,6 +548,20 @@
     if (result.success) {
       showToast('🗑️ Booking deleted!');
       loadBookings();
+      loadStats();
+    }
+  }
+
+  async function updateStatus(id, status) {
+    const res    = await fetch(`/api/admin/bookings/${id}/status`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ status: status })
+    });
+    const result = await res.json();
+    if (result.success) {
+      const labels = { paid:'✅ Paid', demo:'🎫 Demo', pending:'⏳ Pending', cancelled:'❌ Cancelled' };
+      showToast(`Status updated to ${labels[status] || status}!`);
       loadStats();
     }
   }

@@ -56,6 +56,18 @@ def init_db():
             email TEXT UNIQUE NOT NULL,
             phone TEXT,
             password TEXT NOT NULL,
+            is_verified INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS otp_store (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            otp TEXT NOT NULL,
+            name TEXT,
+            phone TEXT,
+            password TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -276,7 +288,37 @@ def generate_simple_pdf(ticket_id, name, match, stand, qty, total, seats='', boo
     return buffer
 
 # ===========================
-#  EMAIL SENDER
+#  OTP EMAIL SENDER
+# ===========================
+def send_otp_email(to_email, name, otp):
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f'CricketPass — Your OTP: {otp}'
+        msg['From']    = EMAIL_ADDRESS
+        msg['To']      = to_email
+        html = f"""
+        <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#0a0f1e;color:#e8eaf6;padding:30px;border-radius:16px;">
+          <h2 style="color:#00C853;">CricketPass</h2>
+          <p>Hello <strong>{name}</strong>,</p>
+          <p style="color:#7e8fa6;">Use the OTP below to verify your email address:</p>
+          <div style="background:#161f33;border:2px solid #00C853;border-radius:12px;padding:24px;text-align:center;margin:20px 0;">
+            <p style="color:#7e8fa6;font-size:0.8rem;letter-spacing:2px;margin-bottom:8px;">YOUR OTP</p>
+            <h1 style="color:#00C853;font-size:3rem;letter-spacing:10px;margin:0;">{otp}</h1>
+          </div>
+          <p style="color:#7e8fa6;font-size:0.82rem;">This OTP is valid for 10 minutes. Do not share it with anyone.</p>
+        </div>
+        """
+        msg.attach(MIMEText(html, 'html'))
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            server.sendmail(EMAIL_ADDRESS, to_email, msg.as_string())
+        return True
+    except Exception as e:
+        print(f'OTP email error: {e}')
+        return False
+
+# ===========================
+#  TICKET EMAIL SENDER
 # ===========================
 def send_ticket_email(to_email, name, ticket_id, match, stand, qty, total, pdf_buffer=None):
     try:
@@ -340,22 +382,100 @@ def login_page():
 def register_page():
     return render_template('register.html')
 
+@app.route('/dashboard')
+def dashboard_page():
+    return render_template('dashboard.html')
+
 # ===========================
 #  AUTH APIs
 # ===========================
 @app.route('/api/register', methods=['POST'])
 def register():
-    data = request.json
-    hashed_pw = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+    data      = request.json
+    name      = data.get('name','').strip()
+    email     = data.get('email','').strip().lower()
+    phone     = data.get('phone','').strip()
+    password  = data.get('password','')
+
+    if not name or not email or not password:
+        return jsonify({'success': False, 'message': 'All fields are required!'})
+
+    # Check if already registered
+    conn = get_db()
+    existing = conn.execute('SELECT id FROM users WHERE email=?', (email,)).fetchone()
+    conn.close()
+    if existing:
+        return jsonify({'success': False, 'message': 'Email already registered!'})
+
+    # Generate 6-digit OTP
+    otp = ''.join(random.choices(string.digits, k=6))
+    hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    # Store OTP temporarily
+    conn = get_db()
+    conn.execute('DELETE FROM otp_store WHERE email=?', (email,))
+    conn.execute('INSERT INTO otp_store (email, otp, name, phone, password) VALUES (?,?,?,?,?)',
+                 (email, otp, name, phone, hashed_pw))
+    conn.commit()
+    conn.close()
+
+    # Send OTP email
+    sent = send_otp_email(email, name, otp)
+    if sent:
+        return jsonify({'success': True, 'otp_sent': True, 'message': f'OTP sent to {email}!'})
+    else:
+        return jsonify({'success': True, 'otp_sent': True, 'otp_demo': otp,
+                        'message': f'OTP (demo): {otp} — Email config nahi set!'})
+
+@app.route('/api/verify-otp', methods=['POST'])
+def verify_otp():
+    data  = request.json
+    email = data.get('email','').strip().lower()
+    otp   = data.get('otp','').strip()
+
+    conn = get_db()
+    row  = conn.execute('SELECT * FROM otp_store WHERE email=?', (email,)).fetchone()
+
+    if not row:
+        conn.close()
+        return jsonify({'success': False, 'message': 'OTP expired! Please register again.'})
+
+    if row['otp'] != otp:
+        conn.close()
+        return jsonify({'success': False, 'message': 'Invalid OTP! Please try again.'})
+
+    # OTP correct — create user
     try:
-        conn = get_db()
-        conn.execute('INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)',
-            (data['name'], data['email'], data.get('phone', ''), hashed_pw))
+        conn.execute('INSERT INTO users (name, email, phone, password, is_verified) VALUES (?,?,?,?,1)',
+                     (row['name'], email, row['phone'], row['password']))
+        conn.execute('DELETE FROM otp_store WHERE email=?', (email,))
         conn.commit()
         conn.close()
-        return jsonify({'success': True, 'message': 'Account created!'})
+        return jsonify({'success': True, 'message': 'Account verified! Please login.'})
     except sqlite3.IntegrityError:
+        conn.close()
         return jsonify({'success': False, 'message': 'Email already registered!'})
+
+@app.route('/api/resend-otp', methods=['POST'])
+def resend_otp():
+    data  = request.json
+    email = data.get('email','').strip().lower()
+    conn  = get_db()
+    row   = conn.execute('SELECT * FROM otp_store WHERE email=?', (email,)).fetchone()
+    conn.close()
+    if not row:
+        return jsonify({'success': False, 'message': 'Session expired! Please register again.'})
+
+    otp = ''.join(random.choices(string.digits, k=6))
+    conn = get_db()
+    conn.execute('UPDATE otp_store SET otp=? WHERE email=?', (otp, email))
+    conn.commit()
+    conn.close()
+    sent = send_otp_email(email, row['name'], otp)
+    if sent:
+        return jsonify({'success': True, 'message': 'New OTP sent!'})
+    else:
+        return jsonify({'success': True, 'otp_demo': otp, 'message': f'Demo OTP: {otp}'})
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -631,6 +751,18 @@ def delete_booking(booking_id):
     conn.commit()
     conn.close()
     return jsonify({'success': True})
+
+@app.route('/api/admin/bookings/<int:booking_id>/status', methods=['PUT'])
+def update_booking_status(booking_id):
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    data   = request.json
+    status = data.get('status', 'paid')
+    conn   = get_db()
+    conn.execute('UPDATE bookings SET payment_status=? WHERE id=?', (status, booking_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'message': f'Status updated to {status}!'})
 
 # ===========================
 #  RUN

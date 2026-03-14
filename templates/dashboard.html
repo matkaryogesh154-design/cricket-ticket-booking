@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Dashboard – CricketPass</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --green:#00C853; --navy:#0a0f1e; --card:#161f33; --accent:#FFD600; --text:#e8eaf6; --muted:#7e8fa6; --red:#FF3D57; --radius:14px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--navy); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+    ::-webkit-scrollbar { width:5px; } ::-webkit-scrollbar-thumb { background:var(--green); border-radius:10px; }
+
+    /* NAVBAR */
+    .navbar { display:flex; align-items:center; justify-content:space-between; padding:14px 32px; background:rgba(10,15,30,0.97); border-bottom:1px solid rgba(0,200,83,0.15); position:sticky; top:0; z-index:100; }
+    .logo { font-family:'Bebas Neue',cursive; font-size:1.8rem; color:var(--green); }
+    .logo span { color:var(--accent); }
+    .nav-actions { display:flex; gap:10px; align-items:center; }
+    .nav-btn { background:transparent; color:var(--text); border:1px solid rgba(255,255,255,0.15); padding:8px 18px; border-radius:30px; cursor:pointer; font-size:0.85rem; font-family:'DM Sans',sans-serif; transition:all 0.2s; text-decoration:none; display:inline-block; }
+    .nav-btn:hover { border-color:var(--green); color:var(--green); }
+    .nav-btn.primary { background:var(--green); color:#000; border-color:var(--green); font-weight:700; }
+
+    /* PAGE */
+    .page { max-width:1000px; margin:0 auto; padding:32px 24px; }
+
+    /* PROFILE CARD */
+    .profile-card { background:var(--card); border:1px solid rgba(0,200,83,0.2); border-radius:var(--radius); padding:28px; margin-bottom:24px; display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+    .avatar { width:64px; height:64px; background:linear-gradient(135deg,#00C853,#00952d); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',cursive; font-size:1.8rem; color:#000; flex-shrink:0; }
+    .profile-info h2 { font-family:'Bebas Neue',cursive; font-size:1.6rem; }
+    .profile-info p { color:var(--muted); font-size:0.85rem; margin-top:2px; }
+    .profile-stats { margin-left:auto; display:flex; gap:24px; flex-wrap:wrap; }
+    .pstat { text-align:center; }
+    .pstat .num { font-family:'Bebas Neue',cursive; font-size:1.8rem; color:var(--green); }
+    .pstat .lbl { color:var(--muted); font-size:0.72rem; }
+
+    /* TABS */
+    .tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+    .tab { padding:9px 20px; border-radius:30px; cursor:pointer; font-size:0.84rem; font-family:'DM Sans',sans-serif; font-weight:600; border:1px solid rgba(255,255,255,0.1); color:var(--muted); background:transparent; transition:all 0.2s; }
+    .tab.active { background:var(--green); color:#000; border-color:var(--green); }
+    .tab:hover:not(.active) { border-color:var(--green); color:var(--green); }
+
+    /* BOOKING CARDS */
+    .booking-card { background:var(--card); border:1px solid rgba(255,255,255,0.06); border-radius:var(--radius); padding:20px; margin-bottom:14px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; transition:border-color 0.2s; }
+    .booking-card:hover { border-color:rgba(0,200,83,0.3); }
+    .ticket-badge { background:rgba(0,200,83,0.08); border:1px solid rgba(0,200,83,0.2); border-radius:10px; padding:12px 16px; text-align:center; min-width:100px; flex-shrink:0; }
+    .ticket-badge .tid { font-family:'Bebas Neue',cursive; font-size:1.3rem; color:var(--green); letter-spacing:2px; }
+    .ticket-badge .tdate { font-size:0.7rem; color:var(--muted); margin-top:2px; }
+    .booking-info { flex:1; min-width:200px; }
+    .booking-info h3 { font-size:1rem; font-weight:700; margin-bottom:6px; }
+    .booking-meta { display:flex; gap:12px; flex-wrap:wrap; font-size:0.78rem; color:var(--muted); }
+    .booking-meta span { display:flex; align-items:center; gap:4px; }
+    .booking-actions { display:flex; gap:8px; flex-shrink:0; }
+    .action-btn { padding:8px 16px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-family:'DM Sans',sans-serif; font-weight:600; border:none; transition:all 0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
+    .action-btn.download { background:rgba(255,214,0,0.1); color:var(--accent); border:1px solid rgba(255,214,0,0.25); }
+    .action-btn.download:hover { background:rgba(255,214,0,0.2); }
+    .status-paid    { background:rgba(0,200,83,0.1); color:var(--green); padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700; }
+    .status-demo    { background:rgba(255,214,0,0.1); color:var(--accent); padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700; }
+    .status-pending { background:rgba(255,61,87,0.1); color:var(--red); padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700; }
+
+    /* STATS CARDS */
+    .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:24px; }
+    .stat-box { background:var(--card); border:1px solid rgba(255,255,255,0.06); border-radius:var(--radius); padding:18px; }
+    .stat-box .icon { font-size:1.5rem; margin-bottom:8px; }
+    .stat-box .val { font-family:'Bebas Neue',cursive; font-size:1.8rem; }
+    .stat-box .val.green { color:var(--green); }
+    .stat-box .val.yellow { color:var(--accent); }
+    .stat-box .val.blue { color:#4fc3f7; }
+    .stat-box .lbl { color:var(--muted); font-size:0.76rem; margin-top:3px; }
+
+    /* EMPTY */
+    .empty { text-align:center; padding:60px 20px; color:var(--muted); }
+    .empty .e-icon { font-size:3rem; margin-bottom:12px; }
+    .empty h3 { color:var(--text); margin-bottom:8px; }
+    .empty a { color:var(--green); text-decoration:none; font-weight:600; }
+
+    /* LOADING */
+    .loading { text-align:center; padding:40px; color:var(--muted); }
+    .spinner { display:inline-block; width:28px; height:28px; border:3px solid rgba(0,200,83,0.2); border-top-color:var(--green); border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:10px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* NOT LOGGED IN */
+    .not-logged { text-align:center; padding:80px 20px; }
+    .not-logged h2 { font-family:'Bebas Neue',cursive; font-size:2rem; margin-bottom:10px; }
+    .not-logged p { color:var(--muted); margin-bottom:24px; }
+
+    @media(max-width:600px) {
+      .navbar { padding:12px 16px; }
+      .page { padding:20px 14px; }
+      .profile-stats { margin-left:0; }
+      .booking-card { flex-direction:column; align-items:flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo">Cricket<span>Pass</span></div>
+  <div class="nav-actions">
+    <a href="/" class="nav-btn">← Home</a>
+    <button class="nav-btn primary" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="page" id="pageContent">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div>Loading your dashboard...</div>
+  </div>
+</div>
+
+<script>
+var currentUser = null;
+var allBookings = [];
+
+const STAND_NAMES = {
+  general: 'General Stand', pavilion: 'Pavilion',
+  premium: 'Premium Covered', vip: 'VIP Box'
+};
+
+// ===== INIT =====
+window.addEventListener('load', async function() {
+  try {
+    const res  = await fetch('/api/me');
+    const user = await res.json();
+    if (!user || !user.id) {
+      showNotLoggedIn();
+      return;
+    }
+    currentUser = user;
+    await loadBookings();
+    renderDashboard();
+  } catch(e) {
+    showNotLoggedIn();
+  }
+});
+
+// ===== LOAD BOOKINGS =====
+async function loadBookings() {
+  const res  = await fetch('/api/bookings');
+  allBookings = await res.json();
+}
+
+// ===== RENDER DASHBOARD =====
+function renderDashboard() {
+  const totalSpent  = allBookings.reduce((s, b) => s + b.total_price, 0);
+  const totalTickets = allBookings.reduce((s, b) => s + b.quantity, 0);
+  const paidCount   = allBookings.filter(b => b.payment_status === 'paid').length;
+  const initials    = currentUser.name.split(' ').map(w => w[0]).join('').toUpperCase().substring(0,2);
+
+  document.getElementById('pageContent').innerHTML = `
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="avatar">${initials}</div>
+      <div class="profile-info">
+        <h2>${currentUser.name}</h2>
+        <p>📧 ${currentUser.email}</p>
+      </div>
+      <div class="profile-stats">
+        <div class="pstat"><div class="num">${allBookings.length}</div><div class="lbl">Bookings</div></div>
+        <div class="pstat"><div class="num">${totalTickets}</div><div class="lbl">Tickets</div></div>
+        <div class="pstat"><div class="num" style="color:var(--accent)">Rs.${totalSpent.toLocaleString()}</div><div class="lbl">Total Spent</div></div>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="icon">🎟️</div>
+        <div class="val green">${allBookings.length}</div>
+        <div class="lbl">Total Bookings</div>
+      </div>
+      <div class="stat-box">
+        <div class="icon">💰</div>
+        <div class="val yellow">Rs.${totalSpent.toLocaleString()}</div>
+        <div class="lbl">Amount Spent</div>
+      </div>
+      <div class="stat-box">
+        <div class="icon">✅</div>
+        <div class="val blue">${paidCount}</div>
+        <div class="lbl">Paid Bookings</div>
+      </div>
+      <div class="stat-box">
+        <div class="icon">🏟️</div>
+        <div class="val green">${totalTickets}</div>
+        <div class="lbl">Total Tickets</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="filterTab('all', this)">All Bookings (${allBookings.length})</button>
+      <button class="tab" onclick="filterTab('paid', this)">✅ Paid</button>
+      <button class="tab" onclick="filterTab('demo', this)">🎫 Demo</button>
+    </div>
+
+    <!-- Bookings List -->
+    <div id="bookingsList"></div>
+  `;
+
+  renderBookings(allBookings);
+}
+
+// ===== RENDER BOOKINGS =====
+function renderBookings(bookings) {
+  const container = document.getElementById('bookingsList');
+  if (!bookings.length) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="e-icon">🎟️</div>
+        <h3>No bookings yet!</h3>
+        <p>Book your first cricket ticket today</p>
+        <br/>
+        <a href="/">Browse Matches →</a>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = bookings.map(b => `
+    <div class="booking-card">
+      <div class="ticket-badge">
+        <div class="tid">${b.ticket_id}</div>
+        <div class="tdate">${b.booked_at ? b.booked_at.split('T')[0] : '—'}</div>
+      </div>
+      <div class="booking-info">
+        <h3>🏏 ${b.match_name}</h3>
+        <div class="booking-meta">
+          <span>🪑 ${STAND_NAMES[b.stand] || b.stand}</span>
+          <span>🎟️ ${b.quantity} ticket${b.quantity > 1 ? 's' : ''}</span>
+          <span>💰 Rs.${b.total_price.toLocaleString()}</span>
+          ${b.seat_numbers ? `<span>📍 Seats: ${b.seat_numbers}</span>` : ''}
+        </div>
+      </div>
+      <div class="booking-actions">
+        ${statusBadge(b.payment_status)}
+        <a href="/api/ticket/download/${b.ticket_id}" class="action-btn download">⬇️ PDF</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== FILTER =====
+function filterTab(type, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (type === 'all') renderBookings(allBookings);
+  else renderBookings(allBookings.filter(b => b.payment_status === type));
+}
+
+function statusBadge(status) {
+  if (status === 'paid')  return '<span class="status-paid">✅ Paid</span>';
+  if (status === 'demo')  return '<span class="status-demo">🎫 Demo</span>';
+  return '<span class="status-pending">⏳ Pending</span>';
+}
+
+// ===== NOT LOGGED IN =====
+function showNotLoggedIn() {
+  document.getElementById('pageContent').innerHTML = `
+    <div class="not-logged">
+      <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
+      <h2>Please Login First</h2>
+      <p>Login to view your booking history and tickets</p>
+      <a href="/login" style="background:var(--green);color:#000;font-weight:700;padding:12px 28px;border-radius:10px;text-decoration:none;font-family:'DM Sans',sans-serif;">Login Now →</a>
+    </div>`;
+}
+
+// ===== LOGOUT =====
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/';
+}
+</script>
+</body>
+</html>

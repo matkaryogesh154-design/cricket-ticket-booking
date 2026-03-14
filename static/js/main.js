@@ -52,6 +52,7 @@ async function checkLogin() {
     if (user && navRight) {
       navRight.innerHTML = `
         <span style="color:var(--muted);font-size:0.88rem;">👋 ${user.name}</span>
+        <a href="/dashboard"><button class="nav-btn">My Bookings</button></a>
         <a href="/admin/login"><button class="nav-btn" style="border-color:rgba(255,214,0,0.3);color:var(--accent);">⚙️ Admin</button></a>
         <button class="nav-btn" onclick="doLogout()">Logout</button>
       `;
