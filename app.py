@@ -77,6 +77,24 @@ def init_db():
             booked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS matches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            match_type TEXT DEFAULT 'IPL',
+            team1 TEXT NOT NULL,
+            team2 TEXT NOT NULL,
+            team1_code TEXT,
+            team2_code TEXT,
+            match_date TEXT,
+            match_time TEXT,
+            venue TEXT,
+            series TEXT,
+            total_seats INTEGER DEFAULT 500,
+            available_seats INTEGER DEFAULT 500,
+            is_active INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -357,7 +375,10 @@ def logout():
 
 @app.route('/api/me', methods=['GET'])
 def me():
-    return jsonify(session.get('user'))
+    user = session.get('user')
+    if user:
+        user['is_admin'] = session.get('admin', False)
+    return jsonify(user)
 
 # ===========================
 #  RAZORPAY APIs
@@ -437,6 +458,76 @@ def get_bookings():
         rows = conn.execute('SELECT * FROM bookings ORDER BY booked_at DESC LIMIT 20').fetchall()
     conn.close()
     return jsonify([dict(r) for r in rows])
+
+# ===========================
+#  MATCHES API (Public)
+# ===========================
+@app.route('/api/matches', methods=['GET'])
+def get_matches():
+    conn = get_db()
+    rows = conn.execute('SELECT * FROM matches WHERE is_active=1 ORDER BY match_date ASC').fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
+
+# ===========================
+#  ADMIN MATCH CRUD
+# ===========================
+@app.route('/api/admin/matches', methods=['GET'])
+def admin_get_matches():
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = get_db()
+    rows = conn.execute('SELECT * FROM matches ORDER BY match_date ASC').fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
+
+@app.route('/api/admin/matches', methods=['POST'])
+def admin_add_match():
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    d = request.json
+    conn = get_db()
+    conn.execute('''INSERT INTO matches
+        (match_type, team1, team2, team1_code, team2_code, match_date, match_time, venue, series, total_seats, available_seats)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+        (d.get('match_type','IPL'), d['team1'], d['team2'],
+         d.get('team1_code',''), d.get('team2_code',''),
+         d['match_date'], d.get('match_time','7:30 PM'),
+         d.get('venue',''), d.get('series','IPL 2025'),
+         int(d.get('total_seats', 500)), int(d.get('total_seats', 500))))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'message': 'Match added successfully!'})
+
+@app.route('/api/admin/matches/<int:match_id>', methods=['PUT'])
+def admin_edit_match(match_id):
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    d = request.json
+    conn = get_db()
+    conn.execute('''UPDATE matches SET
+        match_type=?, team1=?, team2=?, team1_code=?, team2_code=?,
+        match_date=?, match_time=?, venue=?, series=?, total_seats=?, available_seats=?, is_active=?
+        WHERE id=?''',
+        (d.get('match_type','IPL'), d['team1'], d['team2'],
+         d.get('team1_code',''), d.get('team2_code',''),
+         d['match_date'], d.get('match_time','7:30 PM'),
+         d.get('venue',''), d.get('series','IPL 2025'),
+         int(d.get('total_seats',500)), int(d.get('available_seats',500)),
+         int(d.get('is_active',1)), match_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'message': 'Match updated successfully!'})
+
+@app.route('/api/admin/matches/<int:match_id>', methods=['DELETE'])
+def admin_delete_match(match_id):
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = get_db()
+    conn.execute('DELETE FROM matches WHERE id=?', (match_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'message': 'Match deleted!'})
 
 # ===========================
 #  PDF DOWNLOAD ROUTE

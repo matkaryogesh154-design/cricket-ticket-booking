@@ -129,6 +129,9 @@
     <button class="nav-link" onclick="showSection('matches')">
       <span class="icon">🏏</span><span>Match Stats</span>
     </button>
+    <button class="nav-link" onclick="showSection('manage-matches')">
+      <span class="icon">⚙️</span><span>Manage Matches</span>
+    </button>
   </div>
   <div class="sidebar-footer">
     <button class="logout-btn" onclick="doLogout()">
@@ -278,10 +281,114 @@
     </div>
   </div>
 
+  <!-- ===== MANAGE MATCHES ===== -->
+  <div class="section" id="sec-manage-matches">
+
+    <!-- Add Match Form -->
+    <div class="table-card" style="margin-bottom:24px;">
+      <div class="table-header">
+        <h3>➕ Add New Match</h3>
+      </div>
+      <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Team 1</label>
+          <input type="text" id="f_team1" placeholder="e.g. Mumbai Indians" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Team 2</label>
+          <input type="text" id="f_team2" placeholder="e.g. Chennai Super Kings" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Team 1 Code</label>
+          <input type="text" id="f_team1_code" placeholder="e.g. MI" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Team 2 Code</label>
+          <input type="text" id="f_team2_code" placeholder="e.g. CSK" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Match Date</label>
+          <input type="date" id="f_date" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Match Time</label>
+          <input type="text" id="f_time" placeholder="e.g. 7:30 PM" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Venue</label>
+          <input type="text" id="f_venue" placeholder="e.g. Wankhede Stadium, Mumbai" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Series</label>
+          <input type="text" id="f_series" placeholder="e.g. IPL 2025 — Match 1" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Total Seats</label>
+          <input type="number" id="f_seats" placeholder="e.g. 500" value="500" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Match Type</label>
+          <select id="f_type" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;">
+            <option value="IPL">IPL</option>
+            <option value="T20">T20</option>
+            <option value="ODI">ODI</option>
+            <option value="TEST">TEST</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1;">
+          <button onclick="addMatch()" style="background:var(--green);color:#000;font-weight:700;border:none;padding:12px 28px;border-radius:10px;cursor:pointer;font-size:0.95rem;font-family:'DM Sans',sans-serif;transition:0.2s;">
+            ➕ Add Match
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Matches List -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3>🏏 All Matches</h3>
+        <span id="matchesCount">—</span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr><th>ID</th><th>Match</th><th>Date</th><th>Venue</th><th>Seats</th><th>Type</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="matchesBody"><tr><td colspan="8" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- EDIT MODAL -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--card);border-radius:16px;padding:28px;width:100%;max-width:500px;border:1px solid rgba(0,200,83,0.2);max-height:90vh;overflow-y:auto;">
+    <h3 style="font-family:'Bebas Neue',cursive;font-size:1.5rem;margin-bottom:16px;color:var(--green);">Edit Match</h3>
+    <input type="hidden" id="e_id"/>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><label style="display:block;font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Team 1</label><input type="text" id="e_team1" style="width:100%;padding:9px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/></div>
+      <div><label style="display:block;font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Team 2</label><input type="text" id="e_team2" style="width:100%;padding:9px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/></div>
+      <div><label style="display:block;font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Date</label><input type="date" id="e_date" style="width:100%;padding:9px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/></div>
+      <div><label style="display:block;font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Time</label><input type="text" id="e_time" style="width:100%;padding:9px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/></div>
+      <div style="grid-column:1/-1;"><label style="display:block;font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Venue</label><input type="text" id="e_venue" style="width:100%;padding:9px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/></div>
+      <div><label style="display:block;font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Available Seats</label><input type="number" id="e_seats" style="width:100%;padding:9px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;"/></div>
+      <div><label style="display:block;font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Active</label>
+        <select id="e_active" style="width:100%;padding:9px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;">
+          <option value="1">Active</option><option value="0">Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:16px;">
+      <button onclick="closeEditModal()" style="flex:1;background:rgba(255,255,255,0.05);color:var(--text);border:1px solid rgba(255,255,255,0.1);padding:11px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+      <button onclick="saveEdit()" style="flex:2;background:var(--green);color:#000;border:none;padding:11px;border-radius:8px;cursor:pointer;font-weight:700;font-family:'DM Sans',sans-serif;">Save Changes</button>
+    </div>
+  </div>
+</div>
 
 <script>
   let allBookingsData = [];
@@ -299,14 +406,14 @@
     document.getElementById('sec-' + name).classList.add('active');
     event.currentTarget.classList.add('active');
 
-    const titles = { overview:'Admin <span>Overview</span>', bookings:'All <span>Bookings</span>', users:'Registered <span>Users</span>', matches:'Match <span>Stats</span>' };
-    document.getElementById('pageTitle').innerHTML = titles[name];
+    const titles = { overview:'Admin <span>Overview</span>', bookings:'All <span>Bookings</span>', users:'Registered <span>Users</span>', matches:'Match <span>Stats</span>', 'manage-matches':'Manage <span>Matches</span>' };
+    document.getElementById('pageTitle').innerHTML = titles[name] || 'Admin';
   }
 
   // ===== LOAD ALL =====
   async function loadAll() {
-    await Promise.all([loadStats(), loadBookings(), loadUsers()]);
-    showToast('✅ Data refreshed!');
+    await Promise.all([loadStats(), loadBookings(), loadUsers(), loadManageMatches()]);
+    showToast('Data refreshed!');
   }
 
   // ===== STATS =====
@@ -465,6 +572,113 @@
       u.name?.toLowerCase().includes(q) ||
       u.email?.toLowerCase().includes(q)
     ));
+  }
+
+  // ===== MANAGE MATCHES =====
+  async function loadManageMatches() {
+    try {
+      const res  = await fetch('/api/admin/matches');
+      const data = await res.json();
+      document.getElementById('matchesCount').textContent = data.length + ' matches';
+      const tbody = document.getElementById('matchesBody');
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No matches added yet. Add one above!</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(m => `
+        <tr>
+          <td style="color:var(--muted)">#${m.id}</td>
+          <td><strong>${m.team1}</strong> vs <strong>${m.team2}</strong></td>
+          <td style="color:var(--muted)">${m.match_date || '—'}</td>
+          <td style="color:var(--muted);font-size:0.8rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${m.venue}">${m.venue || '—'}</td>
+          <td>${m.available_seats}/${m.total_seats}</td>
+          <td><span style="background:rgba(0,200,83,0.1);color:var(--green);padding:2px 8px;border-radius:10px;font-size:0.72rem;font-weight:700;">${m.match_type}</span></td>
+          <td>${m.is_active ? '<span style="color:var(--green);">● Active</span>' : '<span style="color:var(--red);">● Inactive</span>'}</td>
+          <td style="display:flex;gap:6px;">
+            <button class="del-btn" style="background:rgba(0,200,83,0.1);color:var(--green);border-color:rgba(0,200,83,0.2);" onclick="openEditModal(${JSON.stringify(m).replace(/"/g,'&quot;')})">✏️ Edit</button>
+            <button class="del-btn" onclick="deleteMatch(${m.id})">🗑️</button>
+          </td>
+        </tr>`).join('');
+    } catch(e) { console.error(e); }
+  }
+
+  async function addMatch() {
+    const team1 = document.getElementById('f_team1').value.trim();
+    const team2 = document.getElementById('f_team2').value.trim();
+    const date  = document.getElementById('f_date').value;
+    if (!team1 || !team2 || !date) { showToast('Please fill Team 1, Team 2, and Date!'); return; }
+
+    const res = await fetch('/api/admin/matches', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        team1, team2,
+        team1_code: document.getElementById('f_team1_code').value.trim(),
+        team2_code: document.getElementById('f_team2_code').value.trim(),
+        match_date: date,
+        match_time: document.getElementById('f_time').value.trim() || '7:30 PM',
+        venue:      document.getElementById('f_venue').value.trim(),
+        series:     document.getElementById('f_series').value.trim(),
+        total_seats: document.getElementById('f_seats').value || 500,
+        match_type: document.getElementById('f_type').value
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      showToast('Match added successfully!');
+      ['f_team1','f_team2','f_team1_code','f_team2_code','f_date','f_time','f_venue','f_series'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('f_seats').value = '500';
+      loadManageMatches();
+    }
+  }
+
+  function openEditModal(m) {
+    document.getElementById('e_id').value    = m.id;
+    document.getElementById('e_team1').value = m.team1;
+    document.getElementById('e_team2').value = m.team2;
+    document.getElementById('e_date').value  = m.match_date || '';
+    document.getElementById('e_time').value  = m.match_time || '';
+    document.getElementById('e_venue').value = m.venue || '';
+    document.getElementById('e_seats').value = m.available_seats || 500;
+    document.getElementById('e_active').value = m.is_active ? '1' : '0';
+    document.getElementById('editModal').style.display = 'flex';
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+  }
+
+  async function saveEdit() {
+    const id = document.getElementById('e_id').value;
+    const res = await fetch('/api/admin/matches/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        team1:           document.getElementById('e_team1').value,
+        team2:           document.getElementById('e_team2').value,
+        match_date:      document.getElementById('e_date').value,
+        match_time:      document.getElementById('e_time').value,
+        venue:           document.getElementById('e_venue').value,
+        available_seats: document.getElementById('e_seats').value,
+        is_active:       document.getElementById('e_active').value,
+        match_type: 'IPL', team1_code: '', team2_code: '', series: '', total_seats: 500
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      showToast('Match updated!');
+      closeEditModal();
+      loadManageMatches();
+    }
+  }
+
+  async function deleteMatch(id) {
+    if (!confirm('Delete this match?')) return;
+    const res    = await fetch('/api/admin/matches/' + id, { method: 'DELETE' });
+    const result = await res.json();
+    if (result.success) { showToast('Match deleted!'); loadManageMatches(); }
   }
 
   // ===== LOGOUT =====
